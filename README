@@ -1,13 +1,53 @@
 IPAddrExtensions
 ================
 
-Introduction goes here.
-
+A selection of potentially useful extensions for IPAddr.
 
 Example
 =======
 
-Example goes here.
+    >> IPAddr.new("192.0.2.0/24").length
+    => 24
+    >> IPAddr.new("192.0.2.0/24").first
+    => #<IPAddr: IPv4:192.0.2.0/255.255.255.255>
+    >> IPAddr.new("192.0.2.0/24").last
+    => #<IPAddr: IPv4:192.0.2.255/255.255.255.255>
+    >> IPAddr.new("192.0.2.0/24").scope
+    => "DOCUMENTATION"
+    >> IPAddr.new("192.0.2.0/24").local?
+    => false
+    >> IPAddr.new("192.0.2.0/24").unicast?
+    => false
+    >> IPAddr.new("192.0.2.0/24").multicast?
+    => false
+    >> IPAddr.new("192.0.2.0/24").link?
+    => false
+    >> IPAddr.new("192.0.2.0/24").documentation?
+    => true
+    >> IPAddr.new("192.0.2.0/24").loopback?
+    => false
+    >> IPAddr.new("192.0.2.0/24").global?
+    => false
+    >> IPAddr.new("192.0.2.0/24").private?
+    => false
+    >> IPAddr.new("192.0.2.0/24").space
+    => 256
+    >> IPAddr.new("192.0.2.0/24").reverses
+    => ["192.0.2.in-addr.arpa"]
+    >> IPAddr.new("192.0.2.0/24").host?
+    => false
+    >> IPAddr.new("192.0.2.0/24").prefix?
+    => true
+    >> IPAddr.new("2001:db8::/64").eui_64('00:0D:60:0F:3C:A8')
+    => #<IPAddr: IPv6:2001:0db8:0000:0000:020d:60ff:fe0f:3ca8/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff>
+    >> IPAddr.new("2001:db8::/56").reverses
+    => ["0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "1.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "2.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "3.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "4.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "5.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "6.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "7.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "8.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "9.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "a.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "b.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "c.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "d.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "e.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa", "f.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa"]
+    >> "192.0.2.0/24".to_ip
+    => #<IPAddr: IPv4:192.0.2.0/255.255.255.0>
+    >> 12345.to_ip
+    => #<IPAddr: IPv4:0.0.48.57/255.255.255.255>
+    >> 12345.to_ip(Socket::AF_INET6)
+    => #<IPAddr: IPv6:0000:0000:0000:0000:0000:0000:0000:3039/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff>
 
 
-Copyright (c) 2010 [name of plugin creator], released under the MIT license
+Copyright (c) 2010 James Harton, released under the MIT license
