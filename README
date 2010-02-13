@@ -50,4 +50,4 @@ Example
     => #<IPAddr: IPv6:0000:0000:0000:0000:0000:0000:0000:3039/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff>
 
 
-Copyright (c) 2010 James Harton, released under the MIT license
+Copyright (c) 2010 James Harton, released under the Mozilla Public License.
