@@ -159,7 +159,7 @@ module Mashd
             "RESERVED (IANA)"
           elsif IPAddr.new("168.254.0.0/16").include? self
             "AUTOCONF PRIVATE"
-          elsif IPAddr.new("172.16.0.0/16").include? self
+          elsif IPAddr.new("172.16.0.0/12").include? self
             "RFC1918 PRIVATE"
           elsif IPAddr.new("191.255.0.0/16").include? self
             "RESERVED (IANA)"
@@ -325,6 +325,16 @@ module Mashd
       def prefix?
         !self.host?
       end
+
+      def to_string_including_length
+        if host?
+          to_string_original
+        else
+          "#{to_string_original}/#{length.to_s}"
+        end
+      end
+
+      alias bitmask length
 
     end
     module StringIPExtensions
