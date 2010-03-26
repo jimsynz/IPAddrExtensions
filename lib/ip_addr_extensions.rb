@@ -37,6 +37,13 @@ module Mashd
         # nasty hack, but works well enough.
         @mask_addr.to_s(2).count("1")
       end
+      def length=(length)
+        if self.ipv4?
+          @mask_addr=((1<<32)-1) - ((1<<32-length)-1)
+        elsif self.ipv6?
+          @mask_addr=((1<<128)-1) - ((1<<128-length)-1)
+        end
+      end
 
       # Retrieve the first address in this prefix
       # (called a network address in IPv4 land)
@@ -328,13 +335,42 @@ module Mashd
 
       def to_string_including_length
         if host?
-          to_string_original
+          to_s
         else
-          "#{to_string_original}/#{length.to_s}"
+          "#{to_s}/#{length.to_s}"
         end
       end
 
       alias bitmask length
+
+
+      def /(by) 
+        if self.ipv4?
+          space = 1 << 32 - length
+          if space % by == 0
+            newmask = (((1<<32)-1) ^ (space/by-1)).to_s(2).count("1")
+            (0..by-1).collect do |i|
+              ip = (self.to_i + ((1 << 32 - newmask)*i)).to_ip(Socket::AF_INET)
+              ip.length = newmask
+              ip
+            end
+          else
+            raise ArgumentError.new "Cannot evenly devide by #{by}"
+          end
+        elsif self.ipv6?
+          space = 1 << 128 - length
+          if space % by == 0
+            newmask = (((1<<128)-1) ^ (space/by-1)).to_s(2).count("1")
+            (0..by-1).collect do |i|
+              ip = (self.to_i + ((1 << 128 - newmask)*i)).to_ip(Socket::AF_INET6)
+              ip.length = newmask
+              ip
+            end
+          else
+            raise ArgumentError.new "Cannot evenly devide by #{by}"
+          end
+        end
+      end
 
     end
     module StringIPExtensions
