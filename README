@@ -48,6 +48,8 @@ Example
     => #<IPAddr: IPv4:0.0.48.57/255.255.255.255>
     >> 12345.to_ip(Socket::AF_INET6)
     => #<IPAddr: IPv6:0000:0000:0000:0000:0000:0000:0000:3039/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff>
+    >> ("2001:db8::/32".to_ip / 16).collect { |prefix| prefix.to_string_including_length }
+    => ["2001:db8::/36", "2001:db8:1000::/36", "2001:db8:2000::/36", "2001:db8:3000::/36", "2001:db8:4000::/36", "2001:db8:5000::/36", "2001:db8:6000::/36", "2001:db8:7000::/36", "2001:db8:8000::/36", "2001:db8:9000::/36", "2001:db8:a000::/36", "2001:db8:b000::/36", "2001:db8:c000::/36", "2001:db8:d000::/36", "2001:db8:e000::/36", "2001:db8:f000::/36"]
 
 
 Copyright (c) 2010 James Harton, released under the Mozilla Public License.
