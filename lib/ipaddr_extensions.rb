@@ -77,7 +77,7 @@ module Mashd
           mac = "%:012x" % mac
         end
         if mac.is_a? String
-          mac = mac.split(":").join.downcase
+          mac.gsub!(/[^0-9a-fA-F]/, "")
           if mac.match(/^[0-9a-f]{12}/).nil?
             raise ArgumentError, "Second argument must be a valid MAC address."
           end
