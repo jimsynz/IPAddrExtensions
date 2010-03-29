@@ -21,5 +21,5 @@
 #
 # ***** END LICENSE BLOCK *****
 #
-require File.dirname(__FILE__) + '/lib/ip_addr_extensions'
+require File.dirname(__FILE__) + '/lib/ipaddr_extensions'
 

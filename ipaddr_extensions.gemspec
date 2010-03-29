@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors = ["James Harton"]
   s.date = %q{2010-03-26}
   s.email = %q{jamesotron@gmail.com}
-  s.files = ["MPL-LICENSE", "README", "Rakefile", "init.rb", "install.rb", "ipaddr_extensions.gemspec", "lib/ip_addr_extensions.rb", "tasks/ip_addr_extensions_tasks.rake", "test/ip_addr_extensions_test.rb", "test/test_helper.rb", "uninstall.rb"]
+  s.files = ["MPL-LICENSE", "README", "Rakefile", "init.rb", "install.rb", "ipaddr_extensions.gemspec", "lib/ipaddr_extensions.rb", "tasks/ipaddr_extensions_tasks.rake", "test/ipaddr_extensions_test.rb", "test/test_helper.rb", "uninstall.rb"]
   s.has_rdoc = false
   s.homepage = %q{http://github.com/jamesotron/IPAddrExtensions}
   s.require_paths = ["lib"]
