@@ -22,6 +22,7 @@
 # ***** END LICENSE BLOCK *****
 
 require 'ipaddr'
+require 'scanf'
 
 module Mashd
   module Cc
@@ -198,14 +199,10 @@ module Mashd
         elsif @family == Socket::AF_INET6
           if IPAddr.new("2000::/3").include? self
             require 'scanf'
-            if IPAddr.new("2002::/16").include? self
-              x = self.to_string.scanf("%*4x:%4x:%4x:%*s")
-              "GLOBAL UNICAST (6to4: #{IPAddr.new((x[0]<<16)+x[1], Socket::AF_INET6).to_s})"
-            elsif IPAddr.new("2001::/32").include? self
-              server_ip = IPAddr.new((@addr >> 64) & ((1<<32)-1), Socket::AF_INET)
-              client_ip = IPAddr.new((@addr & ((1<<32)-1)) ^ ((1<<32)-1), Socket::AF_INET)
-              udp_port = ((@addr >> 32) & ((1<<16)-1))
-              "GLOBAL UNICAST (Teredo #{client_ip.to_s}:#{udp_port.to_s} -> #{server_ip.to_s}:#{udp_port.to_s})"
+            if is_6to4?
+              "GLOBAL UNICAST (6to4: #{from_6to4})"
+            elsif is_teredo?
+              "GLOBAL UNICAST (Teredo #{from_teredo[:client].to_s}:#{from_teredo[:port].to_s} -> #{from_teredo[:server].to_s}:#{from_teredo[:port].to_s})"
             elsif IPAddr.new("2001:10::/28").include? self
               "ORCHID"
             elsif IPAddr.new("2001:db8::/32").include? self
@@ -276,7 +273,9 @@ module Mashd
       # 6to4 address.
       def to_6to4
         if @family == Socket::AF_INET
-          IPAddr.new((0x2002 << 112) + (@addr << 80), Socket::AF_INET6)
+          i = IPAddr.new((0x2002 << 112) + (@addr << 80), Socket::AF_INET6)
+          i.length = 48
+          i
         else
           self
         end
@@ -370,6 +369,23 @@ module Mashd
             raise ArgumentError.new "Cannot evenly devide by #{by}"
           end
         end
+      end
+
+
+      def is_teredo?
+        IPAddr.new("2001::/32").include? self
+      end
+
+      def from_teredo
+        is_teredo? && { :server => IPAddr.new((@addr >> 64) & ((1<<32)-1), Socket::AF_INET), :client => IPAddr.new((@addr & ((1<<32)-1)) ^ ((1<<32)-1), Socket::AF_INET), :port => ((@addr >> 32) & ((1<<16)-1)) }
+      end
+
+      def is_6to4?
+        IPAddr.new("2002::/16").include? self
+      end
+      def from_6to4
+        x = self.to_string.scanf("%*4x:%4x:%4x:%s")
+        IPAddr.new((x[0]<<16)+x[1], Socket::AF_INET)
       end
 
     end
