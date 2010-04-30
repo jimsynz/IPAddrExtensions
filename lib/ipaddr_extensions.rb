@@ -391,7 +391,11 @@ module Mashd
     end
     module StringIPExtensions
       def to_ip
-        IPAddr.new(self.to_s)
+        begin
+          IPAddr.new(self.to_s)
+        rescue ArgumentError => e
+          raise ArgumentError, "invalid address #{self.inspect}"
+        end
       end
     end
     module IntIPExtensions
