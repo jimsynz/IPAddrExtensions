@@ -46,6 +46,18 @@ module Mashd
         end
       end
 
+      def subnet_mask
+        @mask_addr.to_ip
+      end
+
+      def wildcard_mask
+        if self.ipv4?
+          (@mask_addr ^ IPAddr::IN4MASK).to_ip
+        else
+          (@mask_addr ^ IPAddr::IN6MASK).to_ip
+        end
+      end
+
       # Retrieve the first address in this prefix
       # (called a network address in IPv4 land)
       def first
