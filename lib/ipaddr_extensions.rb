@@ -23,9 +23,14 @@
 
 require 'ipaddr'
 require 'scanf'
+require 'digest/sha1'
 
 module Sociable
   module IPAddrExtensions
+
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
 
     # Return the bit length of the prefix
     # ie: 
@@ -37,6 +42,8 @@ module Sociable
       # nasty hack, but works well enough.
       @mask_addr.to_s(2).count("1")
     end
+
+    # Modify the bit length of the prefix
     def length=(length)
       if self.ipv4?
         @mask_addr=((1<<32)-1) - ((1<<32-length)-1)
@@ -45,10 +52,22 @@ module Sociable
       end
     end
 
+    # Return an old-style subnet mask
+    # ie:
+    #     IPAddr.new("2001:db8::/32").subnet_mask
+    #     => #<IPAddr: IPv6:ffff:ffff:0000:0000:0000:0000:0000:0000/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff>
+    #     IPAddr.new("192.0.2.0/255.255.255.0").subnet_mask
+    #     => #<IPAddr: IPv4:255.255.255.0/255.255.255.255>
     def subnet_mask
       @mask_addr.to_ip
     end
 
+    # Return a "cisco style" subnet mask for use in ACLs:
+    #
+    #     IPAddr.new("2001:db8::/32").wildcard_mask
+    #     => #<IPAddr: IPv6:0000:0000:ffff:ffff:ffff:ffff:ffff:ffff/ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff>
+    #     IPAddr.new("192.0.2.0/255.255.255.0").wildcard_mask
+    #     => #<IPAddr: IPv4:0.0.0.255/255.255.255.255>
     def wildcard_mask
       if self.ipv4?
         (@mask_addr ^ IPAddr::IN4MASK).to_ip
@@ -62,7 +81,6 @@ module Sociable
     def first
       IPAddr.new(@addr & @mask_addr, @family)
     end
-    alias :begin :first
 
     # Retrieve the last address in this prefix
     # (called a broadcast address in IPv4 land)
@@ -75,7 +93,6 @@ module Sociable
         raise "unsupported address family."
       end
     end
-    alias :end :last
 
     # Return an EUI-64 host address for the current
     # prefix (must be a 64 bit long IPv6 prefix).
@@ -247,6 +264,9 @@ module Sociable
           if MDESTS[mdest]
             s += " #{MDEST[mdest]}"
           end
+          if multicast_from_prefix?
+            s += " (prefix = #{prefix_from_multicast.to_string_including_length})"
+          end
           s
         else
           "RESERVED"
@@ -279,22 +299,46 @@ module Sociable
     def private?
       self.scope.split(' ').member? 'PRIVATE'
     end
+    def multicast_from_prefix?
+      ipv6? && ('ff00::/8'.to_ip.include? self) && ((self.to_i >> 116) & 0x03 == 3)
+    end
+
+    # Returns the original prefix a Multicast address was generated from
+    # see RFC3306
+    def prefix_from_multicast
+      if ipv6? && multicast_from_prefix?
+        prefix_length = (to_i >> 92) & 0xff
+        if (prefix_length == 0xff) && (((to_i >> 112) & 0xf) >= 2)
+          # Link local prefix
+          #(((to_i >> 32) & 0xffffffffffffffff) + (0xfe80 << 112)).to_ip(Socket::AF_INET6).tap { |p| p.length = 64 }
+          return nil # See http://redmine.ruby-lang.org/issues/5468
+        else
+          # Global unicast prefix
+          (((to_i >> 32) & 0xffffffffffffffff) << 64).to_ip(Socket::AF_INET6).tap { |p| p.length = prefix_length }
+        end
+      end
+    end
 
     # Convert an IPv4 address into an IPv6 
     # 6to4 address.
     def to_6to4
       if @family == Socket::AF_INET
-        i = IPAddr.new((0x2002 << 112) + (@addr << 80), Socket::AF_INET6)
-        i.length = 48
-        i
-      else
-        self
+        IPAddr.new((0x2002 << 112) + (@addr << 80), Socket::AF_INET6).tap { |p| p.length = 48 }
       end
     end
 
     # Return the space available inside this prefix
     def space
       self.last.to_i - self.first.to_i + 1
+    end
+
+    # Return usable address space inside this prefix
+    def usable
+      if ipv6?
+        space
+      else
+        space - 2
+      end
     end
 
     # Return likely reverse zones for the Address or prefix
@@ -353,7 +397,6 @@ module Sociable
 
     alias bitmask length
 
-
     def /(by) 
       if self.ipv4?
         space = 1 << 32 - length
@@ -382,7 +425,6 @@ module Sociable
       end
     end
 
-
     def is_teredo?
       IPAddr.new("2001::/32").include? self
     end
@@ -397,6 +439,30 @@ module Sociable
     def from_6to4
       x = self.to_string.scanf("%*4x:%4x:%4x:%s")
       IPAddr.new((x[0]<<16)+x[1], Socket::AF_INET)
+    end
+
+    module ClassMethods
+
+      # Generate an IPv6 Unique Local Address using the supplied system MAC address.
+      # Note that the MAC address is just used as a source of randomness, so where you
+      # get it from is not important and doesn't restrict this ULA to just that system.
+      # See RFC4193
+      def generate_ULA(mac, subnet_id = 0, locally_assigned=true)
+        now = Time.now.utc
+        ntp_time = ((now.to_i + 2208988800) << 32) + now.nsec # Convert time to an NTP timstamp.
+        system_id = '::/64'.to_ip.eui_64(mac).to_i # Generate an EUI64 from the provided MAC address.
+        key = [ ntp_time, system_id ].pack('QQ') # Pack the ntp timestamp and the system_id into a binary string
+        global_id = Digest::SHA1.digest( key ).unpack('QQ').last & 0xffffffffff # Use only the last 40 bytes of the SHA1 digest.
+
+        prefix = 
+          (126 << 121) + # 0xfc (bytes 0..6)
+          ((locally_assigned ? 1 : 0) << 120) + # locally assigned? (byte 7)
+          (global_id << 80) + # 40 bit global idenfitier (bytes 8..48)
+          ((subnet_id & 0xffff) << 64) # 16 bit subnet_id (bytes 48..64)
+
+        prefix.to_ip(Socket::AF_INET6).tap { |p| p.length = 64 }
+      end
+
     end
 
   end
@@ -621,6 +687,7 @@ class IPProtocol
   def to_s
     NAMES[@number]
   end
+
 end
 
 IPAddr.send(:include, Sociable::IPAddrExtensions)
