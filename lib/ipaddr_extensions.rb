@@ -115,6 +115,29 @@ module Sociable
       end
     end
 
+    def eui_64?
+      if @family != Socket::AF_INET6
+        raise Exception, "EUI-64 only makes sense on IPv6 prefixes."
+      #elsif self.length != 64
+      #  raise Exception, "EUI-64 only makes sense on 64 bit IPv6 prefixes."
+      end
+      (self.to_i & 0xfffe000000) == 0xfffe000000
+    end
+
+    def mac
+      if eui_64?
+        network_bits = self.to_i & 0xffffffffffffffff
+        top_chunk = network_bits >> 40
+        bottom_chunk = network_bits & 0xffffff
+        mac = ((top_chunk << 24) + bottom_chunk) ^ 0x20000000000
+        result = []
+        5.downto(0).each do |i|
+          result << sprintf("%02x", (mac >> i * 8) & 0xff)
+        end
+        result * ':'
+      end
+    end
+
     MSCOPES = {
       1 => "INTERFACE LOCAL MULTICAST",
       2 => "LINK LOCAL MULTICAST",
