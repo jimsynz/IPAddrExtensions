@@ -121,7 +121,7 @@ module Sociable
       #elsif self.length != 64
       #  raise Exception, "EUI-64 only makes sense on 64 bit IPv6 prefixes."
       end
-      (self.to_i & 0xfffe000000) == 0xfffe000000
+      (self.to_i & 0x20000fffe000000) == 0x20000fffe000000
     end
 
     def mac
