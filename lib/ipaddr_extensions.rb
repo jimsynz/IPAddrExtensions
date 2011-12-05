@@ -30,6 +30,10 @@ module Sociable
 
     def self.included(base)
       base.extend(ClassMethods)
+      base.class_eval do
+        alias_method :mask_without_a_care!, :mask!
+        alias_method :mask!, :mask_with_a_care!
+      end
     end
 
     # Return the bit length of the prefix
@@ -136,6 +140,16 @@ module Sociable
         end
         result * ':'
       end
+    end
+
+    # Call the original mask! method but don't allow it
+    # to change the internally stored address, since we
+    # might actually need that.
+    def mask_with_a_care!(mask)
+      original_addr = @addr
+      mask_without_a_care!(mask)
+      @addr = original_addr unless self.class.mask_by_default
+      return self
     end
 
     MSCOPES = {
@@ -465,6 +479,23 @@ module Sociable
     end
 
     module ClassMethods
+
+      # By default IPAddr masks a non all-ones prefix so that the
+      # "network address" is all that's stored.  This loses data
+      # for some applications and isn't really necessary since 
+      # anyone expecting that should use #first instead.
+      # This defaults to on to retain compatibility with the
+      # rubycore IPAddr class.
+      def mask_by_default
+        # You can't use ||= for bools.
+        if @mask_by_default.nil?
+          @mask_by_default = true
+        end
+        @mask_by_default
+      end
+      def mask_by_default=(x)
+        @mask_by_default = !!x
+      end
 
       # Generate an IPv6 Unique Local Address using the supplied system MAC address.
       # Note that the MAC address is just used as a source of randomness, so where you
