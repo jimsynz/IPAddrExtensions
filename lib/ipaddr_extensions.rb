@@ -392,7 +392,7 @@ module Sociable
           res = []
           (0..count).each do |i|
             octets = IPAddr.new(first.to_i + ((1<<32-divisor)*i), Socket::AF_INET).to_s.split('.')[0..boundary]
-            res << "#{octets * '.'}.in-addr.arpa"
+            res << "#{octets.reverse * '.'}.in-addr.arpa"
           end
           res
         end
