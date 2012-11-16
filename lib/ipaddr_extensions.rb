@@ -224,18 +224,12 @@ module Sociable
           "CURRENT NETWORK"
         elsif IPAddr.new("10.0.0.0/8").include? self
           "RFC1918 PRIVATE"
-        elsif IPAddr.new("14.0.0.0/8").include? self
-          "PUBLIC DATA"
         elsif IPAddr.new("127.0.0.0/8").include? self
           "LOOPBACK"
-        elsif IPAddr.new("128.0.0.0/18").include? self
-          "RESERVED (IANA)"
         elsif IPAddr.new("168.254.0.0/16").include? self
           "AUTOCONF PRIVATE"
         elsif IPAddr.new("172.16.0.0/12").include? self
           "RFC1918 PRIVATE"
-        elsif IPAddr.new("191.255.0.0/16").include? self
-          "RESERVED (IANA)"
         elsif IPAddr.new("192.0.0.0/24").include? self
           "RESERVED (IANA)"
         elsif IPAddr.new("192.0.2.0/24").include? self
@@ -246,8 +240,10 @@ module Sociable
           "RFC1918 PRIVATE"
         elsif IPAddr.new("198.18.0.0/15").include? self
           "NETWORK BENCHMARK TESTS"
-        elsif IPAddr.new("223.255.255.0/24").include? self
-          "RESERVED (IANA)"
+        elsif IPAddr.new("198.51.100.0/24").include? self
+          "DOCUMENTATION"
+        elsif IPAddr.new("203.0.113.0/24").include? self
+          "DOCUMENTATION"
         elsif IPAddr.new("224.0.0.0/4").include? self
           if IPAddr.new("239.0.0.0/8").include? self
             "LOCAL MULTICAST"
