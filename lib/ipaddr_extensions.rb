@@ -37,7 +37,7 @@ module Sociable
     end
 
     # Return the bit length of the prefix
-    # ie: 
+    # ie:
     #     IPAddr.new("2001:db8::/32").length
     #     => 32
     #     IPAddr.new("192.0.2.0/255.255.255.0").length
@@ -216,7 +216,7 @@ module Sociable
       0x10004 => "DTCP ANNOUNCEMENT",
     }
 
-    # Returns a string describing the scope of the 
+    # Returns a string describing the scope of the
     # address.
     def scope
       if @family == Socket::AF_INET
@@ -312,7 +312,7 @@ module Sociable
       self.scope.split(' ').member? 'LOCAL'
     end
     def unicast?
-      self.scope.split(' ').member? 'UNICAST'
+      !self.scope.split(' ').any? { |scope| ['BROADCAST', 'MULTICAST'].member? scope }
     end
     def multicast?
       self.scope.split(' ').member? 'MULTICAST'
@@ -352,7 +352,7 @@ module Sociable
       end
     end
 
-    # Convert an IPv4 address into an IPv6 
+    # Convert an IPv4 address into an IPv6
     # 6to4 address.
     def to_6to4
       if @family == Socket::AF_INET
@@ -430,7 +430,7 @@ module Sociable
 
     alias bitmask length
 
-    def /(by) 
+    def /(by)
       if self.ipv4?
         space = 1 << 32 - length
         if space % by == 0
@@ -478,7 +478,7 @@ module Sociable
 
       # By default IPAddr masks a non all-ones prefix so that the
       # "network address" is all that's stored.  This loses data
-      # for some applications and isn't really necessary since 
+      # for some applications and isn't really necessary since
       # anyone expecting that should use #first instead.
       # This defaults to on to retain compatibility with the
       # rubycore IPAddr class.
@@ -504,7 +504,7 @@ module Sociable
         key = [ ntp_time, system_id ].pack('QQ') # Pack the ntp timestamp and the system_id into a binary string
         global_id = Digest::SHA1.digest( key ).unpack('QQ').last & 0xffffffffff # Use only the last 40 bytes of the SHA1 digest.
 
-        prefix = 
+        prefix =
           (126 << 121) + # 0xfc (bytes 0..6)
           ((locally_assigned ? 1 : 0) << 120) + # locally assigned? (byte 7)
           (global_id << 80) + # 40 bit global idenfitier (bytes 8..48)
