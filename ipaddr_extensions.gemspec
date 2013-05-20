@@ -1,27 +1,17 @@
 # -*- encoding: utf-8 -*-
+$:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
-  s.name = %q{ipaddr_extensions}
-  s.version = "2012.1.13"
+  s.name          = 'ipaddr_extensions'
+  s.version       = '1.0.0'
+  s.platform      = Gem::Platform::RUBY
+  s.authors       = ["James Harton"]
+  s.email         = %q{james@resistor.io}
+  s.homepage      = %q{http://github.com/jamesotron/IPAddrExtensions}
+  s.summary       = %q{A small gem that adds extra functionality to Rubys IPAddr class}
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["James Harton"]
-  s.date = %q{2011-10-21}
-  s.email = %q{james@sociable.co.nz}
-  s.files = ["MPL-LICENSE", "README", "Rakefile", "init.rb", "install.rb", "ipaddr_extensions.gemspec", "lib/ipaddr_extensions.rb", "tasks/ipaddr_extensions_tasks.rake", "test/ipaddr_extensions_test.rb", "test/test_helper.rb", "uninstall.rb"]
-  s.has_rdoc = false
-  s.homepage = %q{http://github.com/jamesotron/IPAddrExtensions}
+  s.files         = ["MIT-LICENSE", "README", "Rakefile", "ipaddr_extensions.gemspec"] + Dir["lib/**/*"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.6}
-  s.summary = %q{A small gem that adds extra functionality to Rubys IPAddr class}
 
-  if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
-    s.specification_version = 2
-
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-    else
-    end
-  else
-  end
+  s.add_development_dependency 'rake'
 end

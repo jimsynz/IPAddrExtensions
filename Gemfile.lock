@@ -1,0 +1,16 @@
+PATH
+  remote: .
+  specs:
+    ipaddr_extensions (1.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rake (10.0.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  ipaddr_extensions!
+  rake
