@@ -271,7 +271,7 @@ module IPAddrExtensions
           s += " #{MSCOPES[mscope]}"
         end
         if MDESTS[mdest]
-          s += " #{MDEST[mdest]}"
+          s += " #{MDESTS[mdest]}"
         end
         if multicast_from_prefix?
           s += " (prefix = #{prefix_from_multicast.to_string_including_length})"
