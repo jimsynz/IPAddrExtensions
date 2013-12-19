@@ -52,4 +52,4 @@ Example
     => ["2001:db8::/36", "2001:db8:1000::/36", "2001:db8:2000::/36", "2001:db8:3000::/36", "2001:db8:4000::/36", "2001:db8:5000::/36", "2001:db8:6000::/36", "2001:db8:7000::/36", "2001:db8:8000::/36", "2001:db8:9000::/36", "2001:db8:a000::/36", "2001:db8:b000::/36", "2001:db8:c000::/36", "2001:db8:d000::/36", "2001:db8:e000::/36", "2001:db8:f000::/36"]
 
 
-Copyright (c) 2010,2011 James Harto, Sociable Limited, released under the Mozilla Public License.
+Copyright (c) 2010-2013 James Harton, Resistor Limited, released under the MIT License.
