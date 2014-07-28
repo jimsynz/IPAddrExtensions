@@ -404,6 +404,8 @@ module IPAddrExtensions
     end
   end
 
+  alias cidr to_string_including_length
+
   alias bitmask length
 
   def /(by)
@@ -431,6 +433,23 @@ module IPAddrExtensions
       else
         raise ArgumentError.new "Cannot evenly devide by #{by}"
       end
+    end
+  end
+
+  def subnets(length)
+    unless length > self.length
+      raise ArgumentError, "Subnets cannot have prefix lengths longer than or equal to their supernets'"
+    end
+    if self.ipv4?
+      base_len = 32
+    elsif self.ipv6?
+      base_len = 128
+    end
+    (0..(2**(length-self.length))-1).collect do |i|
+      offset = ((base_len - self.length) - (length - self.length))
+      new_subnet = IPAddr.new(self.to_i + (i << offset), self.family)
+      new_subnet.length = length
+      new_subnet
     end
   end
 
