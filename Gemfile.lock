@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ipaddr_extensions (1.0.0)
+    ipaddr_extensions (1.0.2)
 
 GEM
   remote: https://rubygems.org/
